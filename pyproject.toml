@@ -41,6 +41,7 @@ torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cu128", extra = "gpu" },
 ]
+tokenizers = { path = "source_pkg/dist/tokenizers-0.22.2.dev0-cp39-abi3-linux_x86_64.whl" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
