@@ -33,8 +33,8 @@ SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,2}| 
 # Generic GPT-4-style tokenizer based on HuggingFace Tokenizer
 from tokenizers import Tokenizer as HFTokenizer
 from tokenizers import pre_tokenizers, decoders, Regex
-from tokenizers.models import BPE
-from tokenizers.trainers import BpeTrainer
+from tokenizers.models import BPE, BNE
+from tokenizers.trainers import BpeTrainer, BneTrainer
 
 class HuggingFaceTokenizer:
     """Light wrapper around HuggingFace Tokenizer for some utilities"""
@@ -56,14 +56,23 @@ class HuggingFaceTokenizer:
         return cls(tokenizer)
 
     @classmethod
-    def train_from_iterator(cls, text_iterator, vocab_size):
+    def train_from_iterator(cls, text_iterator, vocab_size, tok_type="BPE", max_ngram_length=None):
         # train from an iterator of text
         # Configure the HuggingFace Tokenizer
-        tokenizer = HFTokenizer(BPE(
-            byte_fallback=True, # needed!
-            unk_token=None,
+        if tok_type == "BPE":
+            tokenizer = HFTokenizer(BPE(
+                byte_fallback=True, # needed!
+                unk_token=None,
             fuse_unk=False,
         ))
+        elif tok_type == "BNE":
+            tokenizer = HFTokenizer(BNE(
+                byte_fallback=True, # needed!
+                unk_token=None,
+            fuse_unk=False,
+        ))
+        else:
+            raise ValueError(f"Unknown tokenizer type: {tok_type}")     
         # Normalizer: None
         tokenizer.normalizer = None
         # Pre-tokenizer: GPT-4 style
@@ -80,14 +89,25 @@ class HuggingFaceTokenizer:
         tokenizer.decoder = decoders.ByteLevel()
         # Post-processor: None
         tokenizer.post_processor = None
-        # Trainer: BPE
-        trainer = BpeTrainer(
-            vocab_size=vocab_size,
-            show_progress=True,
-            min_frequency=0, # no minimum frequency
-            initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
-            special_tokens=SPECIAL_TOKENS,
-        )
+        if tok_type == "BPE":
+            # Trainer: BPE
+            trainer = BpeTrainer(
+                vocab_size=vocab_size,
+                show_progress=True,
+                min_frequency=0, # no minimum frequency
+                initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
+                special_tokens=SPECIAL_TOKENS,
+            )
+        elif tok_type == "BNE":
+            # Trainer: BNE
+            trainer = BneTrainer(
+                vocab_size=vocab_size,
+                show_progress=True,
+                min_frequency=0, # no minimum frequency
+                initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
+                special_tokens=SPECIAL_TOKENS,
+                max_ngram_length=max_ngram_length,
+            )
         # Kick off the training
         tokenizer.train_from_iterator(text_iterator, trainer)
         return cls(tokenizer)
