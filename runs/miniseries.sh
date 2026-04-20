@@ -19,7 +19,7 @@ if [ -z "$SKIP_SETUP" ]; then
 
     # Tokenizer, download 1000 shards for pretraining
     # (probably this can be reduced but it's tricky to determine the exact right number, TODO).
-    python -m nanochat.dataset -n 50
+    python -m nanochat.dataset -n 1000
     # python -m scripts.tok_train --max-chars=2000000000 --vocab-size=32768
 else
     source .venv/bin/activate
@@ -66,10 +66,12 @@ for tok in "${TOKENISERS[@]}"; do
     # Reduce --device-batch-size to avoid OOM at larger depths
     if [ $d -ge 28 ]; then
         DEVICE_BATCH_SIZE_ARG="--device-batch-size=8"
-    elif [ $d -ge 20 ]; then
+    elif [ $d -ge 22 ]; then
         DEVICE_BATCH_SIZE_ARG="--device-batch-size=16"
-    else
+    elif [ $d -ge 18 ]; then
         DEVICE_BATCH_SIZE_ARG="--device-batch-size=32"
+    else
+        DEVICE_BATCH_SIZE_ARG="--device-batch-size=64"
     fi
 
     export NANOCHAT_TOKENIZER_DIR="$HOME/nanochat/data/$tok/$vs/"
