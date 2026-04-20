@@ -53,6 +53,7 @@ class HuggingFaceTokenizer:
         # init from a local directory on disk (e.g. "out/tokenizer")
         tokenizer_path = os.path.join(tokenizer_dir, "tokenizer.json")
         tokenizer = HFTokenizer.from_file(tokenizer_path)
+        print(f"Loaded tokenizer from {tokenizer_path}")
         return cls(tokenizer)
 
     @classmethod
@@ -504,7 +505,6 @@ class RustBPETokenizer:
 def get_tokenizer():
     from nanochat.common import get_tokenizer_dir
     tokenizer_dir = get_tokenizer_dir()
-    print(f"Loaded tokenizer from {tokenizer_dir}")
     return HuggingFaceTokenizer.from_directory(tokenizer_dir)
     # return RustBPETokenizer.from_directory(tokenizer_dir)
 
@@ -514,7 +514,7 @@ def get_token_bytes(device="cpu"):
     tokenizer_dir = get_tokenizer_dir()
     token_bytes_path = os.path.join(tokenizer_dir, "token_bytes.pt")
     assert os.path.exists(token_bytes_path), f"Token bytes not found at {token_bytes_path}? It gets written by tok_train.py"
-    print(f"Loaded token-bytes from {tokenizer_dir}")
     with open(token_bytes_path, "rb") as f:
         token_bytes = torch.load(f, map_location=device)
+    print(f"Loaded token-bytes from {token_bytes_path}")
     return token_bytes
