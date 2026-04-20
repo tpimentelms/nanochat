@@ -20,18 +20,19 @@ if [ -z "$SKIP_SETUP" ]; then
     # Tokenizer, download 1000 shards for pretraining
     # (probably this can be reduced but it's tricky to determine the exact right number, TODO).
     python -m nanochat.dataset -n 1000
-    python -m scripts.tok_train --max-chars=2000000000 --vocab-size=32768
+    # python -m scripts.tok_train --max-chars=2000000000 --vocab-size=32768
 else
     source .venv/bin/activate
 fi
 
 
-TOKENISERS=(bpe, bne)
-VOCAB_SIZES=(32k, 64k, 128k)
 # Series name: from arg, env var, or default to today's date (e.g., jan11)
 SERIES_NAME="${1:-${SERIES_NAME:-$(date +%b%d | tr '[:upper:]' '[:lower:]')}}"
 # Depths to train (the "miniseries")
 DEPTHS=(12 16 20 24 14 18 22 26)
+# Tokenisers and vocab sizes to use
+TOKENISERS=(bne, bpe)
+VOCABSIZES=(32k, 64k, 128k)
 # Hardware
 NPROC_PER_NODE="${NPROC_PER_NODE:-8}"
 # Logging
@@ -55,8 +56,8 @@ log "${SERIES_NAME} Miniseries Training"
 log "=============================================="
 
 for d in "${DEPTHS[@]}"; do
-for vs in "${VOCABSIZE[@]}"; do
-for tok in "${TOKENISER[@]}"; do
+for vs in "${VOCABSIZES[@]}"; do
+for tok in "${TOKENISERS[@]}"; do
     log "Training d=$d..."
 
     TAG="${SERIES_NAME}_miniseries_d${d}_tok${tok}_vs${vs}"
@@ -79,7 +80,7 @@ for tok in "${TOKENISER[@]}"; do
         --core-metric-max-per-task=-1 \
         --sample-every=-1 \
         --save-every=-1 \
-        --TOKENISER_NAME="${tok}__${vs}" \
+        --tokeniser-name="${tok}__${vs}" \
         $DEVICE_BATCH_SIZE_ARG \
         2>&1 | tee "$RESULTS_DIR/${TAG}_train.log"
 
