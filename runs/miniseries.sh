@@ -31,7 +31,7 @@ VOCAB_SIZES=(32k, 64k, 128k)
 # Series name: from arg, env var, or default to today's date (e.g., jan11)
 SERIES_NAME="${1:-${SERIES_NAME:-$(date +%b%d | tr '[:upper:]' '[:lower:]')}}"
 # Depths to train (the "miniseries")
-DEPTHS=(12 14 16 18 20 22 24 26)
+DEPTHS=(12 16 20 24 14 18 22 26)
 # Hardware
 NPROC_PER_NODE="${NPROC_PER_NODE:-8}"
 # Logging
@@ -54,9 +54,9 @@ log "=============================================="
 log "${SERIES_NAME} Miniseries Training"
 log "=============================================="
 
-for tok in "${TOKENISER[@]}"; do
-for vs in "${VOCABSIZE[@]}"; do
 for d in "${DEPTHS[@]}"; do
+for vs in "${VOCABSIZE[@]}"; do
+for tok in "${TOKENISER[@]}"; do
     log "Training d=$d..."
 
     TAG="${SERIES_NAME}_miniseries_d${d}_tok${tok}_vs${vs}"
