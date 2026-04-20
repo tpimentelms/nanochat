@@ -14,7 +14,7 @@ if [ -z "$SKIP_SETUP" ]; then
     # uv
     command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
     [ -d ".venv" ] || uv venv
-    uv sync --extra gpu
+    uv sync --extra cpu
     source .venv/bin/activate
 
     # Tokenizer, download 1000 shards for pretraining
@@ -29,7 +29,7 @@ fi
 # Series name: from arg, env var, or default to today's date (e.g., jan11)
 SERIES_NAME="${1:-${SERIES_NAME:-$(date +%b%d | tr '[:upper:]' '[:lower:]')}}"
 # Depths to train (the "miniseries")
-DEPTHS=(12 16 20 24 14 18 22 26)
+DEPTHS=(2 4) #12 16 20 24 14 18 22 26)
 # Tokenisers and vocab sizes to use
 TOKENISERS=(BNE BPE)
 VOCABSIZES=(32k 64k 128k)
