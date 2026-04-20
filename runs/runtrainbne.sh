@@ -22,6 +22,8 @@ fi
 
 # train tokenizer on ~2B characters (~34 seconds on my MacBook Pro M3 Max)
 python -m nanochat.dataset -n 8
+python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BNE --vocab-size=262144 --tokenizer-name=tokenizer_256k
+
 python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BNE --vocab-size=131072 --tokenizer-name=tokenizer_128k
 
 python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BNE --vocab-size=65536 --tokenizer-name=tokenizer_64k
