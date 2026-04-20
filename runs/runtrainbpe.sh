@@ -20,18 +20,20 @@ if [ -z "$WANDB_RUN" ]; then
     WANDB_RUN=dummy
 fi
 
+MAX_CHARS="${MAX_CHARS:-10000000000}"
+
 # train tokenizer on ~2B characters (~34 seconds on my MacBook Pro M3 Max)
-python -m nanochat.dataset -n 8
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=262144 --tokenizer-name=256k
+python -m nanochat.dataset -n 50
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=262144 --tokenizer-name=256k
 
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=131072 --tokenizer-name=128k
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=131072 --tokenizer-name=128k
 
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=65536 --tokenizer-name=64k
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=65536 --tokenizer-name=64k
 
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=32768 --tokenizer-name=32k
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=32768 --tokenizer-name=32k
 
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=16384 --tokenizer-name=16k
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=16384 --tokenizer-name=16k
 
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=8192 --tokenizer-name=8k
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=8192 --tokenizer-name=8k
 
-python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BPE --vocab-size=4096 --tokenizer-name=4k
+python -m scripts.tok_train --max-chars=$MAX_CHARS --tokenizer-type=BPE --vocab-size=4096 --tokenizer-name=4k
