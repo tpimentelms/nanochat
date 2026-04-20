@@ -23,7 +23,7 @@ command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
 # create a .venv local virtual environment (if it doesn't exist)
 [ -d ".venv" ] || uv venv
 # install the repo dependencies
-uv sync --extra gpu
+uv sync --extra cu118
 # activate venv so that `python` uses the project's venv instead of system python
 source .venv/bin/activate
 
@@ -40,7 +40,7 @@ if [ -z "$WANDB_RUN" ]; then
 fi
 
 NUM_GPUS="${NUM_GPUS:-1}"
-BATCH_SIZE="${BATCH_SIZE:-2}"
+BATCH_SIZE="${BATCH_SIZE:-8}"
 
 # -----------------------------------------------------------------------------
 # During the course of the run, we will be writing markdown reports to the report/
@@ -63,8 +63,9 @@ python -m nanochat.dataset -n 8
 python -m nanochat.dataset -n 170 &
 DATASET_DOWNLOAD_PID=$!
 # train the tokenizer with vocab size 2**15 = 32768 on ~2B characters of data
-python -m scripts.tok_train
+# python -m scripts.tok_train
 # evaluate the tokenizer (report compression ratio etc.)
+python -m scripts.tok_gen_bytes
 python -m scripts.tok_eval
 
 # -----------------------------------------------------------------------------
