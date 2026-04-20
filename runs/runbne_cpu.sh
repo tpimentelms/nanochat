@@ -22,8 +22,8 @@ if [ -z "$WANDB_RUN" ]; then
 fi
 
 # train tokenizer on ~2B characters (~34 seconds on my MacBook Pro M3 Max)
-python -m nanochat.dataset -n 1
-python -m scripts.tok_train --max-chars=50000000 --tokenizer-type=BNE --max-ngram-length=8
+python -m nanochat.dataset -n 8
+python -m scripts.tok_train --max-chars=2000000000 --tokenizer-type=BNE --max-ngram-length=8
 python -m scripts.tok_eval
 
 # train a small 4 layer model
