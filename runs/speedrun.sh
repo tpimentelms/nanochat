@@ -40,7 +40,7 @@ if [ -z "$WANDB_RUN" ]; then
 fi
 
 NUM_GPUS="${NUM_GPUS:-1}"
-BATCH_SIZE="${BATCH_SIZE:-8}"
+BATCH_SIZE="${BATCH_SIZE:-4}"
 
 # -----------------------------------------------------------------------------
 # During the course of the run, we will be writing markdown reports to the report/
