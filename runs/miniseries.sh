@@ -74,7 +74,7 @@ for tok in "${TOKENISERS[@]}"; do
         DEVICE_BATCH_SIZE_ARG="--device-batch-size=64"
     fi
 
-    export NANOCHAT_TOKENIZER_DIR="$HOME/nanochat/data/$tok/$vs/"
+    export NANOCHAT_TOKENIZER_DIR="$HOME/nanochat/tokenizers/$tok/$vs/"
 
     torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_train -- \
         --depth=$d \
