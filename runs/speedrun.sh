@@ -23,7 +23,7 @@ command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
 # create a .venv local virtual environment (if it doesn't exist)
 [ -d ".venv" ] || uv venv
 # install the repo dependencies
-uv sync --extra cu118
+uv sync --extra gpu
 # activate venv so that `python` uses the project's venv instead of system python
 source .venv/bin/activate
 
@@ -40,7 +40,7 @@ if [ -z "$WANDB_RUN" ]; then
 fi
 
 NUM_GPUS="${NUM_GPUS:-1}"
-BATCH_SIZE="${BATCH_SIZE:-4}"
+BATCH_SIZE="${BATCH_SIZE:-32}"
 
 # -----------------------------------------------------------------------------
 # During the course of the run, we will be writing markdown reports to the report/
@@ -51,19 +51,20 @@ python -m nanochat.report reset
 # -----------------------------------------------------------------------------
 # Tokenizer
 
-# Download the first ~2B characters of pretraining dataset
-# each data shard is ~250M chars
-# so we download 2e9 / 250e6 = 8 data shards at this point
-# each shard is ~100MB of text (compressed), so this is about ~800MB of data on disk
-# look at dev/repackage_data_reference.py for details on how this data was prepared
-python -m nanochat.dataset -n 8
-# Immediately also kick off downloading more shards in the background while tokenizer trains
-# Approximately 150 shards are needed for GPT-2 capability pretraining, add 20 for padding.
-# The maximum total number of shards available in the entire dataset is 6542.
-python -m nanochat.dataset -n 170 &
-DATASET_DOWNLOAD_PID=$!
+# # Download the first ~2B characters of pretraining dataset
+# # each data shard is ~250M chars
+# # so we download 2e9 / 250e6 = 8 data shards at this point
+# # each shard is ~100MB of text (compressed), so this is about ~800MB of data on disk
+# # look at dev/repackage_data_reference.py for details on how this data was prepared
+# python -m nanochat.dataset -n 8
+# # Immediately also kick off downloading more shards in the background while tokenizer trains
+# # Approximately 150 shards are needed for GPT-2 capability pretraining, add 20 for padding.
+# # The maximum total number of shards available in the entire dataset is 6542.
+# python -m nanochat.dataset -n 170 &
+# DATASET_DOWNLOAD_PID=$!
 # train the tokenizer with vocab size 2**15 = 32768 on ~2B characters of data
 # python -m scripts.tok_train
+# cp data/BNE_unrest/tokenizer_32k/* $NANOCHAT_BASE_DIR/tokenizer/
 # evaluate the tokenizer (report compression ratio etc.)
 python -m scripts.tok_gen_bytes
 python -m scripts.tok_eval
@@ -74,7 +75,7 @@ echo "Waiting for dataset download to complete..."
 wait $DATASET_DOWNLOAD_PID
 
 # d24 model (slightly undertrained to beat GPT-2 => decrease data:params ratio from compute optimal 10.5 (default) to 8)
-torchrun --standalone --nproc_per_node=$NUM_GPUS -m scripts.base_train -- --depth=24 --target-param-data-ratio=8 --device-batch-size=$BATCH_SIZE --fp8 --run=$WANDB_RUN
+torchrun --standalone --nproc_per_node=$NUM_GPUS -m scripts.base_train -- --depth=12 --target-param-data-ratio=8 --device-batch-size=$BATCH_SIZE --run=$WANDB_RUN
 # evaluate the model: CORE metric, BPB on train/val, and draw samples
 torchrun --standalone --nproc_per_node=$NUM_GPUS -m scripts.base_eval -- --device-batch-size=$BATCH_SIZE
 
