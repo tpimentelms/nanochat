@@ -25,10 +25,13 @@ else
     source .venv/bin/activate
 fi
 
+
+TOKENISERS=(bpe, bne)
+VOCAB_SIZES=(32k, 64k, 128k)
 # Series name: from arg, env var, or default to today's date (e.g., jan11)
 SERIES_NAME="${1:-${SERIES_NAME:-$(date +%b%d | tr '[:upper:]' '[:lower:]')}}"
 # Depths to train (the "miniseries")
-DEPTHS=(12 14 16 18 20 22 24 26)
+DEPTHS=(12 16 20 24 14 18 22 26)
 # Hardware
 NPROC_PER_NODE="${NPROC_PER_NODE:-8}"
 # Logging
@@ -40,7 +43,7 @@ RESULTS_FILE="$RESULTS_DIR/results.csv"
 
 # Write CSV header only if file doesn't exist
 if [ ! -f "$RESULTS_FILE" ]; then
-    echo "depth,model_dim,num_params,num_scaling_params,num_iterations,tokens_trained,param_data_ratio,val_bpb,core_score,train_time_sec" > "$RESULTS_FILE"
+    echo "depth,model_dim,num_params,num_scaling_params,num_iterations,tokens_trained,param_data_ratio,tokeniser,vocabsize,val_bpb,core_score,train_time_sec" > "$RESULTS_FILE"
 fi
 
 log() {
@@ -52,9 +55,11 @@ log "${SERIES_NAME} Miniseries Training"
 log "=============================================="
 
 for d in "${DEPTHS[@]}"; do
+for vs in "${VOCABSIZE[@]}"; do
+for tok in "${TOKENISER[@]}"; do
     log "Training d=$d..."
 
-    TAG="${SERIES_NAME}_miniseries_d${d}"
+    TAG="${SERIES_NAME}_miniseries_d${d}_tok${tok}_vs${vs}"
     START_TIME=$(date +%s)
 
     # Reduce --device-batch-size to avoid OOM at larger depths
@@ -68,12 +73,13 @@ for d in "${DEPTHS[@]}"; do
 
     torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_train -- \
         --depth=$d \
-        --run="${WANDB_RUN}_d${d}" \
+        --run="${WANDB_RUN}_d${d}_tok${tok}_vs${vs}" \
         --model-tag="${TAG}" \
         --core-metric-every=999999 \
         --core-metric-max-per-task=-1 \
         --sample-every=-1 \
         --save-every=-1 \
+        --TOKENISER_NAME="${tok}__${vs}" \
         $DEVICE_BATCH_SIZE_ARG \
         2>&1 | tee "$RESULTS_DIR/${TAG}_train.log"
 
@@ -95,10 +101,12 @@ for d in "${DEPTHS[@]}"; do
         CORE_SCORE="0.0"
     fi
 
-    log "  d=$d: params=$NUM_PARAMS, scaling=$NUM_SCALING_PARAMS, ratio=$PARAM_DATA_RATIO, bpb=$VAL_BPB, CORE=$CORE_SCORE, time=${TRAIN_TIME}s"
+    log "  d=$d: params=$NUM_PARAMS, scaling=$NUM_SCALING_PARAMS, ratio=$PARAM_DATA_RATIO, tok=$tok, vocabsize=$vs, bpb=$VAL_BPB, CORE=$CORE_SCORE, time=${TRAIN_TIME}s"
 
     # Append to CSV
-    echo "$d,$MODEL_DIM,$NUM_PARAMS,$NUM_SCALING_PARAMS,$NUM_ITERS,$TOKENS_TRAINED,$PARAM_DATA_RATIO,$VAL_BPB,$CORE_SCORE,$TRAIN_TIME" >> "$RESULTS_FILE"
+    echo "$d,$MODEL_DIM,$NUM_PARAMS,$NUM_SCALING_PARAMS,$NUM_ITERS,$TOKENS_TRAINED,$PARAM_DATA_RATIO,$tok,$vs,$VAL_BPB,$CORE_SCORE,$TRAIN_TIME" >> "$RESULTS_FILE"
+done
+done
 done
 
 log "=============================================="
