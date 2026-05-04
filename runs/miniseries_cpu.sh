@@ -14,12 +14,12 @@ if [ -z "$SKIP_SETUP" ]; then
     # uv
     command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
     [ -d ".venv" ] || uv venv
-    uv sync --extra gpu
+    uv sync --extra cpu
     source .venv/bin/activate
 
     # Tokenizer, download 1000 shards for pretraining
     # (probably this can be reduced but it's tricky to determine the exact right number, TODO).
-    python -m nanochat.dataset -n 1000
+    python -m nanochat.dataset -n 50
     # python -m scripts.tok_train --max-chars=2000000000 --vocab-size=32768
 else
     source .venv/bin/activate
@@ -29,10 +29,9 @@ fi
 # Series name: from arg, env var, or default to today's date (e.g., jan11)
 SERIES_NAME="${1:-${SERIES_NAME:-$(date +%b%d | tr '[:upper:]' '[:lower:]')}}"
 # Depths to train (the "miniseries")
-DEPTHS=(12 14 16 18 20 24)
-# 22 26
+DEPTHS=(2 4) #12 16 20 24 14 18 22 26)
 # Tokenisers and vocab sizes to use
-TOKENISERS=(BPE BNE)
+TOKENISERS=(BNE BPE)
 VOCABSIZES=(32k 64k 128k)
 # Hardware
 NPROC_PER_NODE="${NPROC_PER_NODE:-8}"
@@ -56,9 +55,9 @@ log "=============================================="
 log "${SERIES_NAME} Miniseries Training"
 log "=============================================="
 
-for tok in "${TOKENISERS[@]}"; do
 for d in "${DEPTHS[@]}"; do
 for vs in "${VOCABSIZES[@]}"; do
+for tok in "${TOKENISERS[@]}"; do
     log "Training $tok@$vs with d=$d..."
 
     TAG="${SERIES_NAME}_miniseries_d${d}_tok${tok}_vs${vs}"
@@ -67,15 +66,13 @@ for vs in "${VOCABSIZES[@]}"; do
     # Reduce --device-batch-size to avoid OOM at larger depths
     if [ $d -ge 28 ]; then
         DEVICE_BATCH_SIZE_ARG="--device-batch-size=8"
-    elif [ $d -ge 22 ]; then
+    elif [ $d -ge 20 ]; then
         DEVICE_BATCH_SIZE_ARG="--device-batch-size=16"
-    elif [ $d -ge 18 ]; then
-        DEVICE_BATCH_SIZE_ARG="--device-batch-size=32"
     else
-        DEVICE_BATCH_SIZE_ARG="--device-batch-size=64"
+        DEVICE_BATCH_SIZE_ARG="--device-batch-size=32"
     fi
 
-    export NANOCHAT_TOKENIZER_DIR="tokenizers/$tok/$vs/"
+    export NANOCHAT_TOKENIZER_DIR="$HOME/nanochat/tokenizers/$tok/$vs/"
 
     torchrun --standalone --nproc_per_node=$NPROC_PER_NODE -m scripts.base_train -- \
         --depth=$d \

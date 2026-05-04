@@ -78,6 +78,16 @@ def get_base_dir():
     os.makedirs(nanochat_dir, exist_ok=True)
     return nanochat_dir
 
+def get_tokenizer_dir():
+    if os.environ.get("NANOCHAT_TOKENIZER_DIR"):
+        tokenizer_dir = os.environ.get("NANOCHAT_TOKENIZER_DIR")
+    else:
+        home_dir = os.path.expanduser("~")
+        cache_dir = os.path.join(home_dir, ".cache")
+        tokenizer_dir = os.path.join(cache_dir, "nanochat", "tokenizer")
+    os.makedirs(tokenizer_dir, exist_ok=True)
+    return tokenizer_dir
+
 def download_file_with_lock(url, filename, postprocess_fn=None):
     """
     Downloads a file from a URL to a local path in the base directory.

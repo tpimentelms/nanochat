@@ -19,12 +19,14 @@ parser.add_argument('--doc-cap', type=int, default=10_000, help='Maximum charact
 parser.add_argument('--vocab-size', type=int, default=32768, help='Vocabulary size (default: 32768 = 2^15)')
 parser.add_argument('--tokenizer-type', type=str, default="BPE", help='Tokenizer type (default: BPE)')
 parser.add_argument('--max-ngram-length', type=int, default=None, help='Maximum n-gram length (default: None = deactivated)')
+parser.add_argument('--tokenizer-name', type=str, default="tokenizer", help='Name of the tokenizer (default: tokenizer)')
 args = parser.parse_args()
 print(f"max_chars: {args.max_chars:,}")
 print(f"doc_cap: {args.doc_cap:,}")
 print(f"vocab_size: {args.vocab_size:,}")
 print(f"tokenizer_type: {args.tokenizer_type}")
 print(f"max_ngram_length: {args.max_ngram_length}")
+print(f"tokenizer_name: {args.tokenizer_name}")
 
 # -----------------------------------------------------------------------------
 # Text iterator
@@ -58,7 +60,7 @@ print(f"Training time: {train_time:.2f}s")
 # -----------------------------------------------------------------------------
 # Save the tokenizer to disk
 base_dir = get_base_dir()
-tokenizer_dir = os.path.join(base_dir, "tokenizer")
+tokenizer_dir = os.path.join(base_dir, args.tokenizer_name)
 tokenizer.save(tokenizer_dir)
 
 # -----------------------------------------------------------------------------
