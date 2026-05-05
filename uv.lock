@@ -3736,7 +3736,7 @@ dependencies = [
     { name = "huggingface-hub" },
 ]
 wheels = [
-    { filename = "tokenizers-0.22.2.dev0-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:d1c43927e4ae0dbc87b8d471d6eb3e17586a9f1e73e6bd494f315ebc015d29b8" },
+    { filename = "tokenizers-0.22.2.dev0-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:ecf3f989374c1b01725c42717ec274cffb64f1d9ea5a1028319dc907ae2aa728" },
 ]
 
 [package.metadata]
