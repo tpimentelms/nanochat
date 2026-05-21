@@ -1899,7 +1899,7 @@ requires-dist = [
     { name = "rustbpe", specifier = ">=0.1.0" },
     { name = "setuptools", marker = "extra == 'cpu'", specifier = ">=65.0.0" },
     { name = "tiktoken", specifier = ">=0.11.0" },
-    { name = "tokenizers", path = "source_pkg/dist/tokenizers-0.22.2.dev0-cp39-abi3-manylinux_2_34_x86_64.whl" },
+    { name = "tokenizers", path = "source_pkg/dist/tokenizers-0.22.2.dev0-cp39-abi3-linux_x86_64.whl" },
     { name = "torch", specifier = ">=2.7.1" },
     { name = "torch", marker = "extra == 'cpu'", specifier = "==2.9.1", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "nanochat", extra = "cpu" } },
     { name = "torch", marker = "extra == 'cu118'", specifier = "==2.7.1", index = "https://download.pytorch.org/whl/cu118", conflict = { package = "nanochat", extra = "cu118" } },
@@ -3731,12 +3731,12 @@ wheels = [
 [[package]]
 name = "tokenizers"
 version = "0.22.2.dev0"
-source = { path = "source_pkg/dist/tokenizers-0.22.2.dev0-cp39-abi3-manylinux_2_34_x86_64.whl" }
+source = { path = "source_pkg/dist/tokenizers-0.22.2.dev0-cp39-abi3-linux_x86_64.whl" }
 dependencies = [
     { name = "huggingface-hub" },
 ]
 wheels = [
-    { filename = "tokenizers-0.22.2.dev0-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:ecf3f989374c1b01725c42717ec274cffb64f1d9ea5a1028319dc907ae2aa728" },
+    { filename = "tokenizers-0.22.2.dev0-cp39-abi3-linux_x86_64.whl", hash = "sha256:5213b2a8f1cdb1867cd0cc96e01acc9530ff25c5e5aabab39fe3377965e4452a" },
 ]
 
 [package.metadata]
